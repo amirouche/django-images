@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+from PIL import Image
 from django import forms
 from django.utils.text import slugify
 
+from imageresize import imageresize
+
+from .settings import PICTURE_FORMATS
 from .models import PICTURE_CHOICES
 from .pictt import save
 
@@ -13,17 +17,26 @@ class PictureForm(forms.Form):
     name = forms.CharField(label=u"Nom")
 
     def clean(self):
-        cleaned_data = super(PictureForm, self).clean()
-        picture = cleaned_data.get('picture')
-        ptype = cleaned_data.get('ptype')
-        name = cleaned_data.get('name')
+        data = super(PictureForm, self).clean()
+        picture = data.get('picture')
+        ptype = data.get('ptype')
 
-        if picture and ptype and name:
-            filename = slugify(name)
+        if picture and ptype:
+            formats = PICTURE_FORMATS[str(ptype)]
+            maximum = formats['sizes'].values()[0]['size']
+            method = formats['sizes'].values()[0]['method']
+            for value in formats['sizes'].values()[1:]:
+                size = max(maximum, value['size'])
+                if size != maximum:
+                    method = value['method']
+                    maximum = size
+            method = 'resize_' + method
+            method = getattr(imageresize, method)
             try:
-                save(picture, filename, int(ptype))
-            except Exception as e:
-                error = forms.ValidationError(e.message)
+                with Image.open(picture) as image:
+                    method.validator(image, maximum)
+            except Exception as exc:
+                error = forms.ValidationError(exc.message)
                 self.add_error('picture', error)
 
 
