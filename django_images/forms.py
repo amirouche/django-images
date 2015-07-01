@@ -2,11 +2,8 @@
 from django import forms
 from django.utils.text import slugify
 
-from pictures import (
-    pictt,
-    picttexceptions
-)
-from pictures.models import PICTURE_CHOICES
+from .models import PICTURE_CHOICES
+from .pictt import save
 
 
 class PictureForm(forms.Form):
@@ -24,8 +21,8 @@ class PictureForm(forms.Form):
         if picture and ptype and name:
             filename = slugify(name)
             try:
-                pictt.save(picture, filename, int(ptype))
-            except picttexceptions.ImageSizeError as e:
+                save(picture, filename, int(ptype))
+            except Exception as e:
                 error = forms.ValidationError(e.message)
                 self.add_error('picture', error)
 
@@ -47,8 +44,8 @@ class PictureTypeForm(forms.Form):
         if picture and ptype and name:
             filename = slugify(name)
             try:
-                pict = pictt.save(picture, filename, int(ptype))
-            except picttexceptions.ImageSizeError as e:
+                pict = save(picture, filename, int(ptype))
+            except Exception as e:  # FIXME: no generic exception
                 error = forms.ValidationError(e.message)
                 self.add_error('picture', error)
             else:

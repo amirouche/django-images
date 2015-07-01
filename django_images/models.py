@@ -1,9 +1,11 @@
 from django.db import models
-from django.conf import settings as SETTINGS
+from .settings import PICTURE_FORMATS
 import os
 
+PICTURE_CHOICES = [
+    [int(key), value['display']] for key, value in PICTURE_FORMATS.items()
+]
 
-PICTURE_CHOICES = [[int(key), value['display']] for key, value in SETTINGS.PICTURES.items()]
 
 class Picture(models.Model):
     """
@@ -26,14 +28,18 @@ class Picture(models.Model):
     def __unicode__(self):
         return self.name
 
-    def relativeurl(self, sz):
-        return os.path.join(SETTINGS.PICTURES[str(self.ptype)]['folder'], self.filename(sz))
+    def relativeurl(self, size):
+        folder = PICTURE_FORMATS[str(self.ptype)]['folder']
+        return folder + '-' + self.filename(size)
 
     def url(self, size):
-        return os.path.join(SETTINGS.S3_ENDPOINT, self.relativeurl(size))
+        return os.path.join('http://localhost:8000/media/', self.relativeurl(size))
 
     def filename(self, sz):
-    	return '%s_%sx%s.%s' % (self.name, getattr(self, sz + '_width'), getattr(self, sz + '_height'), self.ext)
+        return '%s_%sx%s.%s' % (
+            self.name,
+            getattr(self, sz + '_width'), getattr(self, sz + '_height'), self.ext
+        )
 
     @property
     def allrelativeurl(self):
@@ -46,11 +52,11 @@ class Picture(models.Model):
         return arr
 
     def picture_dict(self, sz):
-    	return {
-                "url": self.url(sz),
-                "width": getattr(self, sz + '_width'),
-                "height": getattr(self, sz + '_height')
-            }
+        return {
+            "url": self.url(sz),
+            "width": getattr(self, sz + '_width'),
+            "height": getattr(self, sz + '_height')
+        }
 
     @property
     def xs(self):
