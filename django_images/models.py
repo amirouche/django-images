@@ -30,15 +30,21 @@ class Picture(models.Model):
 
     def relativeurl(self, size):
         folder = PICTURE_FORMATS[str(self.ptype)]['folder']
-        return folder + '-' + self.filename(size)
+        url = '%s/%s' % (folder, self.filename(size))
+        return url
 
     def url(self, size):
-        return os.path.join('http://localhost:8000/media/', self.relativeurl(size))
+        return os.path.join(
+            'http://localhost:8000/media/',
+            self.relativeurl(size)
+        )
 
     def filename(self, sz):
         return '%s_%sx%s.%s' % (
             self.name,
-            getattr(self, sz + '_width'), getattr(self, sz + '_height'), self.ext
+            getattr(self, sz + '_width'),
+            getattr(self, sz + '_height'),
+            self.ext
         )
 
     @property
