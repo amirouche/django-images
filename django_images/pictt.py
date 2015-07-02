@@ -1,21 +1,13 @@
 # -*- coding: utf-8 -*-
 from PIL import Image
 from cStringIO import StringIO
-from imageresize import imageresize, imageexceptions
+
+from django.core.files.storage import default_storage
+
+from imageresize import imageresize
 
 from .models import Picture
 from .settings import PICTURE_FORMATS
-
-# def imgfromurl(url):
-#     try:
-#         r = requests.get(url)
-#     except requests.ConnectionError as e:
-#         raise picttexceptions.URLError(e)
-#     except requests.HTTPError as e:
-#         raise picttexceptions.URLError(e)
-#     else:
-#         img = StringIO(r.content)
-#     return img
 
 
 def resize_img(image_file, params):
@@ -35,9 +27,8 @@ def save_img(image_file, folder, filename):
         size[1],
         image_file.format.lower()
     )
-    filename = 'media/' + folder + '-' + filename
-    with open(filename, 'w') as f:
-        f.write(filelike.getvalue())
+    filename = folder + '/' + filename
+    default_storage.save(filename, filelike)
 
 
 def save(input_file, filename, ptype):
