@@ -1,13 +1,14 @@
 import os
-from codecs import open
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
-here = os.path.abspath(os.path.dirname(__file__))
-
-
-with open(os.path.join(here, 'README.md')) as f:
-    README = f.read()
+try:
+    here = os.path.abspath(os.path.dirname(__file__))
+    with open(os.path.join(here, 'README.md')) as f:
+        README = f.read()
+except IOError:
+    # work around packing bug when using tox
+    README = ''
 
 
 setup(
@@ -29,6 +30,6 @@ setup(
     ],
     keywords='image resize bootstrap django',
     packages=['django_images'],
-    install_requires=['python-image-resize', 'Django'],
+    install_requires=['python-resize-image', 'Django'],
     test_suite='tests',
 )

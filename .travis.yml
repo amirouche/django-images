@@ -5,6 +5,6 @@ python:
   - "3.4"
   
 install:
-  - python setup.py install
+  - pip install -q tox
   
-script: python runtests.py
+script: python setup.py test
