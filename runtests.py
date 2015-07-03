@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test.utils import get_runner
 
 
-if __name__ == "__main__":
+def main():
     try:
         shutil.rmtree(os.path.join(os.path.dirname(__file__), 'tests', 'media'))
     except OSError:
@@ -22,3 +22,7 @@ if __name__ == "__main__":
     test_runner = TestRunner()
     failures = test_runner.run_tests(["tests"])
     sys.exit(bool(failures))
+
+
+if __name__ == "__main__":
+    main()
