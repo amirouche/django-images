@@ -4,7 +4,7 @@ from cStringIO import StringIO
 
 from django.core.files.storage import default_storage
 
-from imageresize import imageresize
+from resizeimage import resizeimage
 
 from .models import Picture
 from .settings import PICTURE_FORMATS
@@ -12,7 +12,7 @@ from .settings import PICTURE_FORMATS
 
 def resize_img(image_file, params):
     return getattr(
-        imageresize,
+        resizeimage,
         'resize_%s' % params['method']
     )(image_file, params['size'])
 

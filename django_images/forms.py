@@ -3,7 +3,7 @@ from PIL import Image
 from django import forms
 from cStringIO import StringIO
 
-from imageresize import imageresize
+from resizeimage import resizeimage
 
 from .models import PICTURE_CHOICES
 from .settings import PICTURE_FORMATS
@@ -33,7 +33,7 @@ class PictureForm(forms.Form):
                     method = value['method']
                     maximum = size
             method = 'resize_' + method
-            method = getattr(imageresize, method)
+            method = getattr(resizeimage, method)
 
             # Create a clone of the picture to use with validation
             # We need to do this because `Image.open` close the
@@ -45,7 +45,7 @@ class PictureForm(forms.Form):
             try:
                 # do validation against the max constraint
                 with Image.open(clone) as image:
-                    method.validator(image, maximum)
+                    method.validate(image, maximum)
             except Exception as exc:
                 # the image doesn't satify the constraint.
                 self.add_error('picture', exc.message)

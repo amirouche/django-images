@@ -9,7 +9,11 @@ from django.test.utils import get_runner
 
 
 if __name__ == "__main__":
-    shutil.rmtree(os.path.join(os.path.dirname(__file__), 'tests', 'media'))
+    try:
+        shutil.rmtree(os.path.join(os.path.dirname(__file__), 'tests', 'media'))
+    except OSError:
+        # directory doesn't exist
+        pass
 
     #
     os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.settings'

@@ -29,12 +29,11 @@ class TestDjangoImages(TestCase):
             FILES = MultiValueDict()
             FILES['picture'] = image
             POST = MultiValueDict()
-            POST['ptype'] = 3
+            POST['ptype'] = 1
             POST['name'] = 'test with big.jpeg'
 
             # create form
             form = PictureForm(POST, FILES)
-
             # validate resize operation
             self.assertTrue(form.is_valid())
 
@@ -49,7 +48,7 @@ class TestDjangoImages(TestCase):
                 self.assertTrue(os.path.exists(filepath))
 
     def test_fail_to_resize_small_image_in_background_format(self):
-        """Test resizing of big enough image to background format"""
+        """Test resizing of image fails validation"""
         filepath = os.path.join(settings.BASE_DIR, 'small.jpeg')
 
         with open(filepath) as f:
