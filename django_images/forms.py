@@ -4,6 +4,7 @@ from django import forms
 from cStringIO import StringIO
 
 from resizeimage import resizeimage
+from resizeimage.imageexceptions import ImageSizeError
 
 from .models import PICTURE_CHOICES
 from .settings import PICTURE_FORMATS
@@ -46,7 +47,7 @@ class PictureForm(forms.Form):
                 # do validation against the max constraint
                 with Image.open(clone) as image:
                     method.validate(image, maximum)
-            except Exception as exc:
+            except ImageSizeError as exc:
                 # the image doesn't satify the constraint.
                 self.add_error('picture', exc.message)
                 return False
