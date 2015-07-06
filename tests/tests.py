@@ -87,7 +87,8 @@ class TestDjangoImages(TestCase):
         from django_images.models import Image
         image = Image(
             ptype='1',
-            name='test-image-model',
+            name='test image model',
+            uid='42',
             ext='ext',
             xs_width=100,
             xs_height=100,
@@ -102,23 +103,23 @@ class TestDjangoImages(TestCase):
         )
         self.assertEqual(
             image.xs['url'],
-            'http://example.com/media/covers/test-image-model_100x100.ext'
+            'http://example.com/media/covers/42_100x100.ext'
         )
         self.assertEqual(
             image.sm['url'],
-            'http://example.com/media/covers/test-image-model_200x200.ext'
+            'http://example.com/media/covers/42_200x200.ext'
         )
         self.assertEqual(
             image.md['url'],
-            'http://example.com/media/covers/test-image-model_300x300.ext'
+            'http://example.com/media/covers/42_300x300.ext'
         )
         self.assertEqual(
             image.lg['url'],
-            'http://example.com/media/covers/test-image-model_400x400.ext'
+            'http://example.com/media/covers/42_400x400.ext'
         )
         self.assertEqual(
             image.og['url'],
-            'http://example.com/media/covers/test-image-model_1000x1000.ext'
+            'http://example.com/media/covers/42_1000x1000.ext'
         )
 
     def test_fail_to_resize_small_image_in_background_format(self):
@@ -181,4 +182,4 @@ class TestDjangoImages(TestCase):
         # create two times the same image:
         one = create_image()
         two = create_image()
-        self.assertFalse(one.og['url'] != two.og['url'])
+        self.assertTrue(one.og['url'] != two.og['url'])

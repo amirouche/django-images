@@ -13,8 +13,9 @@ class Image(models.Model):
     """
     manage all images for the application
     """
-    ptype = models.SmallIntegerField(choices=IMAGE_CHOICES)
     name = models.CharField(max_length=255)
+    ptype = models.SmallIntegerField(choices=IMAGE_CHOICES)
+    uid = models.CharField(max_length=255)
     ext = models.CharField(max_length=5)
     xs_width = models.SmallIntegerField()
     xs_height = models.SmallIntegerField()
@@ -41,12 +42,13 @@ class Image(models.Model):
         return url
 
     def filename(self, size):
-        return '%s_%sx%s.%s' % (
-            self.name,
+        filepath = "%s_%sx%s.%s" % (
+            self.uid,
             getattr(self, size + '_width'),
             getattr(self, size + '_height'),
-            self.ext
+            self.ext,
         )
+        return filepath
 
     @property
     def allrelativeurl(self):
