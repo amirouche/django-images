@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from PIL import Image
+from uuid import uuid4
 from cStringIO import StringIO
 
 from django.core.files.storage import default_storage
@@ -8,6 +9,18 @@ from resizeimage import resizeimage
 
 from .models import Picture
 from .settings import PICTURE_FORMATS
+
+
+def unique_filepath(folder, filename):
+    filepath = folder + '/' + filename
+    if not default_storage.exists(filepath):
+        return filepath
+    else:
+        while True:
+            filepath = folder + '/' + uuid4().hex
+            filepath += '-' + filename
+            if not default_storage.exists(filepath):
+                return filepath
 
 
 def resize_img(image_file, params):
@@ -27,8 +40,8 @@ def save_img(image_file, folder, filename):
         size[1],
         image_file.format.lower()
     )
-    filename = folder + '/' + filename
-    default_storage.save(filename, filelike)
+    filepath = unique_filepath(folder, filename)
+    default_storage.save(filepath, filelike)
 
 
 def save(input_file, filename, ptype):

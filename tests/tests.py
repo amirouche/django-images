@@ -11,7 +11,6 @@ from django_images.forms import PictureForm
 from django_images.forms import PictureFixedFormatForm
 
 
-
 class TestDjangoImages(TestCase):
 
     def test_resize_big_image_in_background_format(self):
@@ -147,3 +146,39 @@ class TestDjangoImages(TestCase):
 
             # validate resize operation
             self.assertFalse(form.is_valid())
+
+    def test_generate_unique_filename(self):
+        """Test that two images with same size and same name
+        can be stored on disk"""
+        def create_picture():
+            filepath = os.path.join(settings.BASE_DIR, 'big.jpeg')
+            with open(filepath) as f:
+                # prepare form data
+                image = InMemoryUploadedFile(
+                    f,
+                    'picture',
+                    'big.jpeg',
+                    'image/jpeg',
+                    42,  # not significant for the test
+                    'utf-8'
+                )
+                files = MultiValueDict()
+                files['picture'] = image
+                post = MultiValueDict()
+                post['ptype'] = 1
+                post['name'] = 'test with big.jpeg'
+
+                # create form
+                form = PictureForm(post, files)
+                # validate resize operation
+                form.is_valid()
+
+                # execute resize operation
+                data = form.cleaned_data
+                filename = slugify(data['name'])
+                picture = save(data['picture'], filename, data['ptype'])
+                return picture
+        # create two times the same picture:
+        one = create_picture()
+        two = create_picture()
+        self.assertFalse(one.og['url'] != two.og['url'])
