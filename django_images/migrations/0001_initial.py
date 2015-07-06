@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Picture',
+            name='Image',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('ptype', models.SmallIntegerField(choices=[[1, b'Background image'], [3, b'Picto'], [2, b'Content image'], [4, b'Logo']])),

@@ -5,13 +5,13 @@ from django import forms
 from resizeimage import resizeimage
 from resizeimage.imageexceptions import ImageSizeError
 
-from .models import PICTURE_CHOICES
-from .settings import PICTURE_FORMATS
+from .models import IMAGE_CHOICES
+from .settings import IMAGE_FORMATS
 
 
-def validate(picture, ptype):
+def validate(image, ptype):
     # compute max constraint size with method
-    formats = PICTURE_FORMATS[ptype]
+    formats = IMAGE_FORMATS[ptype]
     maximum = formats['sizes'].values()[0]['size']
     method = formats['sizes'].values()[0]['method']
     for value in formats['sizes'].values()[1:]:
@@ -22,65 +22,65 @@ def validate(picture, ptype):
     method = 'resize_' + method
     method = getattr(resizeimage, method)
 
-    # mock close method so that PIL doesn't really close picture
-    close_method = picture.close
-    picture.close = lambda *args, **kwargs: None
+    # mock close method so that PIL doesn't really close image
+    close_method = image.close
+    image.close = lambda *args, **kwargs: None
     try:
         # do validation against the max constraint
-        with Image.open(picture) as image:
-            method.validate(image, maximum)
+        with Image.open(image) as pil_image:
+            method.validate(pil_image, maximum)
     except ImageSizeError as exc:
         # the image doesn't satisfy the constraint.
         return False, exc.message
     else:
-        # It's ok, reset picture position and close method
-        picture.file.seek(0)
-        picture.close = close_method
+        # It's ok, reset image position and close method
+        image.file.seek(0)
+        image.close = close_method
         return True, None
 
 
-class PictureForm(forms.Form):
-    """Validate that the given picture can be resized"""
+class ImageForm(forms.Form):
+    """Validate that the given image can be resized"""
     
-    picture = forms.FileField()
+    image = forms.FileField()
     ptype = forms.ChoiceField(
-        choices=PICTURE_CHOICES,
+        choices=IMAGE_CHOICES,
         label=u"Type de photo"
     )
     name = forms.CharField()
 
     def is_valid(self):
-        if not super(PictureForm, self).is_valid():
+        if not super(ImageForm, self).is_valid():
             return False
         else:
             data = self.clean()
-            picture = data['picture']
+            image = data['image']
             ptype = data['ptype']
-            ok, message = validate(picture, str(ptype))
+            ok, message = validate(image, str(ptype))
             if ok:
                 return True
             else:
-                self.add_error('picture', message)
+                self.add_error('image', message)
 
 
-class PictureFixedFormatForm(forms.Form):
-    """Same as `PictureForm` except that the picture format is fixed"""
+class ImageFixedFormatForm(forms.Form):
+    """Same as `ImageForm` except that the image format is fixed"""
 
-    picture = forms.FileField()
+    image = forms.FileField()
 
     def __init__(self, ptype, name, *args, **kwargs):
         self.ptype = ptype
         self.name = name
-        super(PictureFixedFormatForm, self).__init__(*args, **kwargs)
+        super(ImageFixedFormatForm, self).__init__(*args, **kwargs)
 
     def is_valid(self):
-        if not super(PictureFixedFormatForm, self).is_valid():
+        if not super(ImageFixedFormatForm, self).is_valid():
             return False
         else:
-            picture = self.clean()['picture']
+            image = self.clean()['image']
             ptype = self.ptype
-            ok, message = validate(picture, str(ptype))
+            ok, message = validate(image, str(ptype))
             if ok:
                 return True
             else:
-                self.add_error('picture', message)
+                self.add_error('image', message)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PIL import Image
+import PIL
 from uuid import uuid4
 from cStringIO import StringIO
 
@@ -7,8 +7,8 @@ from django.core.files.storage import default_storage
 
 from resizeimage import resizeimage
 
-from .models import Picture
-from .settings import PICTURE_FORMATS
+from .models import Image
+from .settings import IMAGE_FORMATS
 
 
 def unique_filepath(folder, filename):
@@ -45,19 +45,19 @@ def save_img(image_file, folder, filename):
 
 
 def save(input_file, filename, ptype):
-    obj = PICTURE_FORMATS[str(ptype)]
-    img = Image.open(input_file)
-    picture = Picture()
-    picture.ptype = ptype
-    picture.name = filename
-    picture.ext = img.format.lower()
+    obj = IMAGE_FORMATS[str(ptype)]
+    img = PIL.Image.open(input_file)
+    image = Image()
+    image.ptype = ptype
+    image.name = filename
+    image.ext = img.format.lower()
     for key, value in obj['sizes'].items():
         resized_img = resize_img(img, value)
-        setattr(picture, key + '_width', resized_img.size[0])
-        setattr(picture, key + '_height', resized_img.size[1])
+        setattr(image, key + '_width', resized_img.size[0])
+        setattr(image, key + '_height', resized_img.size[1])
         save_img(resized_img, obj['folder'], filename)
-    setattr(picture, 'og_width', img.size[0])
-    setattr(picture, 'og_height', img.size[1])
+    setattr(image, 'og_width', img.size[0])
+    setattr(image, 'og_height', img.size[1])
     save_img(img, obj['folder'], filename)
-    picture.save()
-    return picture
+    image.save()
+    return image

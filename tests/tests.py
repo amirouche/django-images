@@ -6,9 +6,9 @@ from django.utils.text import slugify
 from django.utils.datastructures import MultiValueDict
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from django_images.pictt import save
-from django_images.forms import PictureForm
-from django_images.forms import PictureFixedFormatForm
+from django_images.image import save
+from django_images.forms import ImageForm
+from django_images.forms import ImageFixedFormatForm
 
 
 class TestDjangoImages(TestCase):
@@ -21,30 +21,30 @@ class TestDjangoImages(TestCase):
             # prepare form data
             image = InMemoryUploadedFile(
                 f,
-                'picture',
+                'image',
                 'big.jpeg',
                 'image/jpeg',
                 42,  # not significant for the test
                 'utf-8'
             )
             files = MultiValueDict()
-            files['picture'] = image
+            files['image'] = image
             post = MultiValueDict()
             post['ptype'] = 1
             post['name'] = 'test with big.jpeg'
 
             # create form
-            form = PictureForm(post, files)
+            form = ImageForm(post, files)
             # validate resize operation
             self.assertTrue(form.is_valid())
 
             # execute resize operation
             data = form.cleaned_data
             filename = slugify(data['name'])
-            picture = save(data['picture'], filename, data['ptype'])
+            image = save(data['image'], filename, data['ptype'])
 
             for size in ('og', 'lg', 'md', 'sm', 'xs'):
-                filepath = picture.relativeurl(size)
+                filepath = image.relativeurl(size)
                 filepath = os.path.join(settings.MEDIA_ROOT, filepath)
                 self.assertTrue(os.path.exists(filepath))
 
@@ -56,18 +56,18 @@ class TestDjangoImages(TestCase):
             # prepare form data
             image = InMemoryUploadedFile(
                 f,
-                'picture',
+                'image',
                 'big.jpeg',
                 'image/jpeg',
                 42,  # not significant for the test
                 'utf-8'
             )
             files = MultiValueDict()
-            files['picture'] = image
+            files['image'] = image
             post = MultiValueDict()
 
             # create form
-            form = PictureFixedFormatForm('1', 'test', post, files)
+            form = ImageFixedFormatForm('1', 'test', post, files)
 
             # validate resize operation
             self.assertTrue(form.is_valid())
@@ -75,19 +75,19 @@ class TestDjangoImages(TestCase):
             # execute resize operation
             data = form.cleaned_data
             filename = slugify(form.name)
-            picture = save(data['picture'], filename, form.ptype)
+            image = save(data['image'], filename, form.ptype)
 
             for size in ('og', 'lg', 'md', 'sm', 'xs'):
-                filepath = picture.relativeurl(size)
+                filepath = image.relativeurl(size)
                 filepath = os.path.join(settings.MEDIA_ROOT, filepath)
                 self.assertTrue(os.path.exists(filepath))
 
     def test_model_api(self):
-        """Test that Picture model behave correctly"""
-        from django_images.models import Picture
-        picture = Picture(
+        """Test that Image model behave correctly"""
+        from django_images.models import Image
+        image = Image(
             ptype='1',
-            name='test-picture-model',
+            name='test-image-model',
             ext='ext',
             xs_width=100,
             xs_height=100,
@@ -101,24 +101,24 @@ class TestDjangoImages(TestCase):
             og_height=1000,
         )
         self.assertEqual(
-            picture.xs['url'],
-            'http://example.com/media/covers/test-picture-model_100x100.ext'
+            image.xs['url'],
+            'http://example.com/media/covers/test-image-model_100x100.ext'
         )
         self.assertEqual(
-            picture.sm['url'],
-            'http://example.com/media/covers/test-picture-model_200x200.ext'
+            image.sm['url'],
+            'http://example.com/media/covers/test-image-model_200x200.ext'
         )
         self.assertEqual(
-            picture.md['url'],
-            'http://example.com/media/covers/test-picture-model_300x300.ext'
+            image.md['url'],
+            'http://example.com/media/covers/test-image-model_300x300.ext'
         )
         self.assertEqual(
-            picture.lg['url'],
-            'http://example.com/media/covers/test-picture-model_400x400.ext'
+            image.lg['url'],
+            'http://example.com/media/covers/test-image-model_400x400.ext'
         )
         self.assertEqual(
-            picture.og['url'],
-            'http://example.com/media/covers/test-picture-model_1000x1000.ext'
+            image.og['url'],
+            'http://example.com/media/covers/test-image-model_1000x1000.ext'
         )
 
     def test_fail_to_resize_small_image_in_background_format(self):
@@ -129,20 +129,20 @@ class TestDjangoImages(TestCase):
             # prepare form data
             image = InMemoryUploadedFile(
                 f,
-                'picture',
+                'image',
                 'small.jpeg',
                 'image/jpeg',
                 42,  # not significant for the test
                 'utf-8'
             )
             files = MultiValueDict()
-            files['picture'] = image
+            files['image'] = image
             post = MultiValueDict()
             post['ptype'] = 1
             post['name'] = 'test with small.jpeg'
 
             # create form
-            form = PictureForm(post, files)
+            form = ImageForm(post, files)
 
             # validate resize operation
             self.assertFalse(form.is_valid())
@@ -150,35 +150,35 @@ class TestDjangoImages(TestCase):
     def test_generate_unique_filename(self):
         """Test that two images with same size and same name
         can be stored on disk"""
-        def create_picture():
+        def create_image():
             filepath = os.path.join(settings.BASE_DIR, 'big.jpeg')
             with open(filepath) as f:
                 # prepare form data
                 image = InMemoryUploadedFile(
                     f,
-                    'picture',
+                    'image',
                     'big.jpeg',
                     'image/jpeg',
                     42,  # not significant for the test
                     'utf-8'
                 )
                 files = MultiValueDict()
-                files['picture'] = image
+                files['image'] = image
                 post = MultiValueDict()
                 post['ptype'] = 1
                 post['name'] = 'test with big.jpeg'
 
                 # create form
-                form = PictureForm(post, files)
+                form = ImageForm(post, files)
                 # validate resize operation
                 form.is_valid()
 
                 # execute resize operation
                 data = form.cleaned_data
                 filename = slugify(data['name'])
-                picture = save(data['picture'], filename, data['ptype'])
-                return picture
-        # create two times the same picture:
-        one = create_picture()
-        two = create_picture()
+                image = save(data['image'], filename, data['ptype'])
+                return image
+        # create two times the same image:
+        one = create_image()
+        two = create_image()
         self.assertFalse(one.og['url'] != two.og['url'])

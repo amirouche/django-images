@@ -1,19 +1,19 @@
 from django.db import models
 from django.conf import settings
 
-from .settings import PICTURE_FORMATS
+from .settings import IMAGE_FORMATS
 
 
-PICTURE_CHOICES = [
-    [int(key), value['display']] for key, value in PICTURE_FORMATS.items()
+IMAGE_CHOICES = [
+    [int(key), value['display']] for key, value in IMAGE_FORMATS.items()
 ]
 
 
-class Picture(models.Model):
+class Image(models.Model):
     """
     manage all images for the application
     """
-    ptype = models.SmallIntegerField(choices=PICTURE_CHOICES)
+    ptype = models.SmallIntegerField(choices=IMAGE_CHOICES)
     name = models.CharField(max_length=255)
     ext = models.CharField(max_length=5)
     xs_width = models.SmallIntegerField()
@@ -31,7 +31,7 @@ class Picture(models.Model):
         return self.name
 
     def relativeurl(self, size):
-        folder = PICTURE_FORMATS[str(self.ptype)]['folder']
+        folder = IMAGE_FORMATS[str(self.ptype)]['folder']
         url = '%s/%s' % (folder, self.filename(size))
         return url
 
@@ -58,7 +58,7 @@ class Picture(models.Model):
         arr.append(self.relativeurl('og'))
         return arr
 
-    def picture_dict(self, size):
+    def image_dict(self, size):
         return {
             "url": self.url(size),
             "width": getattr(self, size + '_width'),
@@ -67,23 +67,23 @@ class Picture(models.Model):
 
     @property
     def xs(self):
-        return self.picture_dict('xs')
+        return self.image_dict('xs')
 
     @property
     def sm(self):
-        return self.picture_dict('sm')
+        return self.image_dict('sm')
 
     @property
     def md(self):
-        return self.picture_dict('md')
+        return self.image_dict('md')
 
     @property
     def lg(self):
-        return self.picture_dict('lg')
+        return self.image_dict('lg')
 
     @property
     def og(self):
-        return self.picture_dict('og')
+        return self.image_dict('og')
 
     def todict(self):
         res = {}

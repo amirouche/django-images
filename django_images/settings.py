@@ -1,7 +1,7 @@
 from django.conf import settings as SETTINGS
 
 
-DEFAULT_PICTURE_FORMATS = {
+DEFAULT_IMAGE_FORMATS = {
     "1": {
         "folder": "covers",
         "display": "Background image",
@@ -92,4 +92,4 @@ DEFAULT_PICTURE_FORMATS = {
     }
 }
 
-PICTURE_FORMATS = getattr(SETTINGS, 'PICTURE_FORMATS', DEFAULT_PICTURE_FORMATS)
+IMAGE_FORMATS = getattr(SETTINGS, 'IMAGE_FORMATS', DEFAULT_IMAGE_FORMATS)
