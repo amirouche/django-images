@@ -3,9 +3,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 
-from django_images.views import generic
-from django_images.views import fixed
-from django_images.views import index
+from .views import generic
+from .views import fixed
+from .views import index
 
 
 urlpatterns = patterns(

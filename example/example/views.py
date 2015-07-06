@@ -3,10 +3,10 @@ from django.shortcuts import render
 from django.utils.text import slugify
 from django.http import HttpResponseRedirect
 
-from .pictt import save
-from .models import Picture
-from .forms import PictureForm
-from .forms import PictureFixedFormatForm
+from django_images.pictt import save
+from django_images.models import Picture
+from django_images.forms import PictureForm
+from django_images.forms import PictureFixedFormatForm
 
 
 def index(request):
