@@ -17,5 +17,5 @@ INSTALLED_APPS = [
     'tests',
 ]
 
-MEDIA_URL = '/media/'
+MEDIA_URL = 'http://example.com/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

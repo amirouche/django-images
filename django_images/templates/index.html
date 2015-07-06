@@ -11,14 +11,16 @@
   <body>
     <div class="container">
       <h1>django-images</h1>
-      <h2></h2>
+      <h2>List picture models</h2>
       <div>
-      	<form method="POST" enctype="multipart/form-data">
-      	  {% csrf_token %}
-          {{form.errors}}
-      	  {{form.as_ul}}
-      	  <input type="submit"/>
-      	</form>
+        {% for picture in pictures %}
+        <h2>{{ picture.name }}</h2>
+        <ul>
+          {% for size, image in picture.todict.items %}
+          <li><a href="{{ image.url }}">{{ size }}</a></li>
+          {% endfor %}
+        </ul>
+        {% endfor %}
       </div>
   </body>
 </html>

@@ -3,7 +3,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 
-from django_images.views import debug
+from django_images.views import generic
+from django_images.views import fixed
+from django_images.views import index
 
 
 urlpatterns = patterns(
@@ -13,5 +15,10 @@ urlpatterns = patterns(
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url('^$', debug),
-)  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url('^generic/$', generic),
+    url('^fixed/$', fixed),
+    url('^$', index),
+) + static(
+    settings.MEDIA_URL,
+    document_root=settings.MEDIA_ROOT
+)
