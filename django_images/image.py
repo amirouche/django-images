@@ -12,12 +12,17 @@ from .settings import IMAGE_FORMATS
 
 
 def store(pil_image, filepath):
+    """Store image on django's `default_storage`"""
     stringio = StringIO()
     pil_image.save(stringio, pil_image.format)
     default_storage.save(filepath, stringio)
 
 
 def save(input_file, filename, ptype):
+    """Save original image `input_file` and generate resized images.
+
+    Return a `Image` instance for the image"""
+
     obj = IMAGE_FORMATS[str(ptype)]
     img = PIL.Image.open(input_file)
     # prepare django Image instance

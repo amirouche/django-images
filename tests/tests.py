@@ -3,6 +3,7 @@ from django.test import TestCase
 
 from django.conf import settings
 from django.utils.text import slugify
+from django.core.files.storage import default_storage
 from django.utils.datastructures import MultiValueDict
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
@@ -183,3 +184,40 @@ class TestDjangoImages(TestCase):
         one = create_image()
         two = create_image()
         self.assertTrue(one.og['url'] != two.og['url'])
+
+    def test_delete_image(self):
+        """Test that two images with same size and same name
+        can be stored on disk"""
+        def create_image():
+            filepath = os.path.join(settings.BASE_DIR, 'big.jpeg')
+            with open(filepath) as f:
+                # prepare form data
+                image = InMemoryUploadedFile(
+                    f,
+                    'image',
+                    'big.jpeg',
+                    'image/jpeg',
+                    42,  # not significant for the test
+                    'utf-8'
+                )
+                files = MultiValueDict()
+                files['image'] = image
+                post = MultiValueDict()
+                post['ptype'] = 1
+                post['name'] = 'test with big.jpeg'
+
+                # create form
+                form = ImageForm(post, files)
+                # validate resize operation
+                form.is_valid()
+
+                # execute resize operation
+                data = form.cleaned_data
+                filename = slugify(data['name'])
+                image = save(data['image'], filename, data['ptype'])
+                return image
+        # create two times the same image:
+        one = create_image()
+        self.assertTrue(default_storage.exists(one.relativeurl('og')))
+        one.delete()
+        self.assertFalse(default_storage.exists(one.relativeurl('og')))
