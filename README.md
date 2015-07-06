@@ -29,7 +29,7 @@ def resize(request):
 ```
 
 This view will show a form to resize images based on the specifications. You can customize the form and the methods
-used to resize images by defining `PICTURES_FORMATS`, a default value exist in `django_images.settings`. Here is another example:
+used to resize images by setting `settings.PICTURES_FORMATS`. A default value exist in `django_images.settings`. Here is another example:
 
 ```python
 DEFAULT_PICTURE_FORMATS = {
