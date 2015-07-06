@@ -1,6 +1,8 @@
 from django.db import models
+from django.conf import settings
+
 from .settings import PICTURE_FORMATS
-import os
+
 
 PICTURE_CHOICES = [
     [int(key), value['display']] for key, value in PICTURE_FORMATS.items()
@@ -34,16 +36,15 @@ class Picture(models.Model):
         return url
 
     def url(self, size):
-        return os.path.join(
-            'http://localhost:8000/media/',
-            self.relativeurl(size)
-        )
+        url = settings.MEDIA_URL
+        url += self.relativeurl(size)
+        return url
 
-    def filename(self, sz):
+    def filename(self, size):
         return '%s_%sx%s.%s' % (
             self.name,
-            getattr(self, sz + '_width'),
-            getattr(self, sz + '_height'),
+            getattr(self, size + '_width'),
+            getattr(self, size + '_height'),
             self.ext
         )
 
@@ -57,11 +58,11 @@ class Picture(models.Model):
         arr.append(self.relativeurl('og'))
         return arr
 
-    def picture_dict(self, sz):
+    def picture_dict(self, size):
         return {
-            "url": self.url(sz),
-            "width": getattr(self, sz + '_width'),
-            "height": getattr(self, sz + '_height')
+            "url": self.url(size),
+            "width": getattr(self, size + '_width'),
+            "height": getattr(self, size + '_height')
         }
 
     @property
