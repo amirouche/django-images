@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> Getting started &middot; Bootstrap</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>django-images</h1>
+      <h2></h2>
+      <div>
+      	<form method="POST" enctype="multipart/form-data">
+      	  {% csrf_token %}
+          {{form.errors}}
+      	  {{form.as_ul}}
+      	  <input type="submit"/>
+      	</form>
+      </div>
+  </body>
+</html>
