@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from PIL import Image
 from django import forms
-from cStringIO import StringIO
 
 from resizeimage import resizeimage
 from resizeimage.imageexceptions import ImageSizeError
@@ -40,18 +39,20 @@ class PictureForm(forms.Form):
             # We need to do this because `Image.open` close the
             # `picture` file which can not be opened later
             picture = data['picture']
-            clone = StringIO()
-            clone.write(picture.file.read())
 
+            # mock close method so that PIL doesn't really close picture
+            close_method = picture.close
+            picture.close = lambda *args, **kwargs: None
             try:
                 # do validation against the max constraint
-                with Image.open(clone) as image:
+                with Image.open(picture) as image:
                     method.validate(image, maximum)
             except ImageSizeError as exc:
                 # the image doesn't satify the constraint.
                 self.add_error('picture', exc.message)
                 return False
             else:
-                # It's ok,  reset picture file seek position for later re-use
+                # It's ok,  reset picture position and close method
                 picture.file.seek(0)
+                picture.close = close_method
                 return True
