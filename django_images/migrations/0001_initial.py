@@ -14,8 +14,9 @@ class Migration(migrations.Migration):
             name='Image',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('ptype', models.SmallIntegerField(choices=[[1, b'Background image'], [3, b'Picto'], [2, b'Content image'], [4, b'Logo']])),
                 ('name', models.CharField(max_length=255)),
+                ('ptype', models.SmallIntegerField(choices=[[1, b'Background image'], [3, b'Picto'], [2, b'Content image'], [4, b'Logo']])),
+                ('uid', models.CharField(max_length=255)),
                 ('ext', models.CharField(max_length=5)),
                 ('xs_width', models.SmallIntegerField()),
                 ('xs_height', models.SmallIntegerField()),

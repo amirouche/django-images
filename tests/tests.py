@@ -3,6 +3,7 @@ from django.test import TestCase
 
 from django.conf import settings
 from django.utils.text import slugify
+from django.core.files.storage import default_storage
 from django.utils.datastructures import MultiValueDict
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
@@ -87,7 +88,8 @@ class TestDjangoImages(TestCase):
         from django_images.models import Image
         image = Image(
             ptype='1',
-            name='test-image-model',
+            name='test image model',
+            uid='42',
             ext='ext',
             xs_width=100,
             xs_height=100,
@@ -102,23 +104,23 @@ class TestDjangoImages(TestCase):
         )
         self.assertEqual(
             image.xs['url'],
-            'http://example.com/media/covers/test-image-model_100x100.ext'
+            'http://example.com/media/covers/42_100x100.ext'
         )
         self.assertEqual(
             image.sm['url'],
-            'http://example.com/media/covers/test-image-model_200x200.ext'
+            'http://example.com/media/covers/42_200x200.ext'
         )
         self.assertEqual(
             image.md['url'],
-            'http://example.com/media/covers/test-image-model_300x300.ext'
+            'http://example.com/media/covers/42_300x300.ext'
         )
         self.assertEqual(
             image.lg['url'],
-            'http://example.com/media/covers/test-image-model_400x400.ext'
+            'http://example.com/media/covers/42_400x400.ext'
         )
         self.assertEqual(
             image.og['url'],
-            'http://example.com/media/covers/test-image-model_1000x1000.ext'
+            'http://example.com/media/covers/42_1000x1000.ext'
         )
 
     def test_fail_to_resize_small_image_in_background_format(self):
@@ -181,4 +183,41 @@ class TestDjangoImages(TestCase):
         # create two times the same image:
         one = create_image()
         two = create_image()
-        self.assertFalse(one.og['url'] != two.og['url'])
+        self.assertTrue(one.og['url'] != two.og['url'])
+
+    def test_delete_image(self):
+        """Test that two images with same size and same name
+        can be stored on disk"""
+        def create_image():
+            filepath = os.path.join(settings.BASE_DIR, 'big.jpeg')
+            with open(filepath) as f:
+                # prepare form data
+                image = InMemoryUploadedFile(
+                    f,
+                    'image',
+                    'big.jpeg',
+                    'image/jpeg',
+                    42,  # not significant for the test
+                    'utf-8'
+                )
+                files = MultiValueDict()
+                files['image'] = image
+                post = MultiValueDict()
+                post['ptype'] = 1
+                post['name'] = 'test with big.jpeg'
+
+                # create form
+                form = ImageForm(post, files)
+                # validate resize operation
+                form.is_valid()
+
+                # execute resize operation
+                data = form.cleaned_data
+                filename = slugify(data['name'])
+                image = save(data['image'], filename, data['ptype'])
+                return image
+        # create two times the same image:
+        one = create_image()
+        self.assertTrue(default_storage.exists(one.relativeurl('og')))
+        one.delete()
+        self.assertFalse(default_storage.exists(one.relativeurl('og')))
