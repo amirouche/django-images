@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
+import sys
 import PIL
 from uuid import uuid4
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    # StringIO was replaced by io module
+    from io import BytesIO as StringIO
 
 from django.core.files.storage import default_storage
 
@@ -9,6 +14,12 @@ from resizeimage import resizeimage
 
 from .models import Image
 from .settings import IMAGE_FORMATS
+
+
+if sys.version_info > (3, 0):
+    PY3 = True
+else:
+    PY3 = False
 
 
 def store(pil_image, filepath):
@@ -22,9 +33,12 @@ def save(input_file, filename, ptype):
     """Save original image `input_file` and generate resized images.
 
     Return a `Image` instance for the image"""
-
+    if PY3:
+        fd = input_file.file.buffer.raw
+    else:
+        fd = input_file
     obj = IMAGE_FORMATS[str(ptype)]
-    img = PIL.Image.open(input_file)
+    img = PIL.Image.open(fd)
     # prepare django Image instance
     image = Image()
     image.ptype = ptype

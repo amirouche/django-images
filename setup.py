@@ -31,5 +31,4 @@ setup(
     keywords='image resize bootstrap django',
     packages=['django_images'],
     install_requires=['python-resize-image', 'Django'],
-    test_suite='tests',
 )
