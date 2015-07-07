@@ -4,6 +4,7 @@ from .models import Image
 
 
 def size_display_factory(size):
+    """Create a function to use an a model field display in the admin list"""
     def getter(model):
         infos = getattr(model, size)
         html = '<a href="%s">%s</a>'
@@ -20,6 +21,7 @@ def size_display_factory(size):
 
 
 class ImageAdmin(admin.ModelAdmin):
+    """Custom admin for Image model"""
 
     list_display = ['preview', 'name', 'xs', 'sm', 'md', 'lg', 'og']
 
@@ -30,6 +32,7 @@ class ImageAdmin(admin.ModelAdmin):
         super(ImageAdmin, self).__init__(*args, **kwargs)
 
     def preview(self, model):
+        """Display the image in the smallest size"""
         html = '<img src="%s" alt="%s"/>' % (
             model.xs['url'],
             model.name
