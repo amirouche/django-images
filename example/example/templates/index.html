@@ -6,21 +6,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title> Getting started &middot; Bootstrap</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css"> 
+    <link rel="stylesheet" href="/static/main.css">   
   </head>
   <body>
-    <div class="container">
+    <div id="title">
       <h1>django-images</h1>
-      <h2>List picture models</h2>
-      <div>
-        {% for picture in pictures %}
-        <h2>{{ picture.name }}</h2>
-        <ul>
-          {% for size, image in picture.todict.items %}
-          <li><a href="{{ image.url }}">{{ size }}</a></li>
-          {% endfor %}
-        </ul>
+      <p>by</p>
+      <a href="http://vingtcinq.io"><img src="/static/25.png"/></a>
+    </div>
+    <div class="container">
+      <h2>* Add images</h2>
+      <p><a href="/generic">Generic form</a></p>
+      <p><a href="fixed">Fixed form (background type)</a></p>      
+      <h2>* <code>django_images.models.Image</code> objects</h2>
+      <div id="images">
+        {% for image in images %}
+          <div class="thumbnail">
+            <h2>{{ picture.name }}</h2>
+            <div class="wrapper"><img src="{{ image.sm.url }}" /></div>
+            <ul>
+              {% for size, image in image.todict.items %}
+                <li><a href="{{ image.url }}">{{ size }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% empty %}
+          Nothing to show
         {% endfor %}
       </div>
+    </div>
   </body>
 </html>

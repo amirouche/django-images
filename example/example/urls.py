@@ -19,6 +19,11 @@ urlpatterns = patterns(
     url('^fixed/$', fixed),
     url('^$', index),
 ) + static(
+    settings.STATIC_URL,
+    document_root=settings.STATIC_ROOT,
+    show_indexes=True
+) + static(
     settings.MEDIA_URL,
-    document_root=settings.MEDIA_ROOT
+    document_root=settings.MEDIA_ROOT,
+    show_indexes=True
 )
