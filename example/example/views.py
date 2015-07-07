@@ -10,10 +10,10 @@ from django_images.forms import ImageFixedFormatForm
 
 
 def index(request):
-    """Display the list of pictures in all sizes"""
-    pictures = Image.objects.all()
+    """Display the list of images in all sizes"""
+    images = Image.objects.all()
     return render(request, 'index.html', {
-        'pictures': pictures,
+        'images': images,
     })
 
 
