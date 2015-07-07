@@ -33,8 +33,13 @@ def save(input_file, filename, ptype):
     """Save original image `input_file` and generate resized images.
 
     Return a `Image` instance for the image"""
+    # workaround difference in byte handling in py3
     if PY3:
-        fd = input_file.file.buffer.raw
+        try:
+            fd = input_file.file.file.raw
+        except AttributeError:
+            # During tests file is backed by a buffer
+            fd = input_file.file.buffer.raw
     else:
         fd = input_file
     obj = IMAGE_FORMATS[str(ptype)]

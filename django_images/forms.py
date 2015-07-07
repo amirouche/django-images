@@ -12,7 +12,6 @@ from .settings import IMAGE_FORMATS
 
 
 if sys.version_info > (3, 0):
-    print(sys.version_info)
     PY3 = True
 else:
     PY3 = False
@@ -37,7 +36,11 @@ def validate(image, ptype):
     # but because of the new behavior of str/bytes
     # in python 3 we use the raw fd
     if PY3:
-        fd = image.file.buffer.raw
+        try:
+            fd = image.file.file.raw
+        except AttributeError:
+            # During tests file is backed by a buffer
+            fd = image.file.buffer.raw
     else:
         fd = image
     close_method = fd.close
