@@ -16,9 +16,7 @@
       <a href="http://vingtcinq.io"><img src="/static/25.png"/></a>
     </div>
     <div class="container">
-      <h2>* Add images</h2>
-      <p><a href="/generic">Generic form</a></p>
-      <p><a href="fixed">Fixed form (background type)</a></p>      
+      <h2>* <a href="/add">Add a background image</a></h2>
       <h2>* <code>django_images.models.Image</code> objects</h2>
       <div id="images">
         {% for image in images %}
@@ -26,8 +24,8 @@
             <h2>{{ picture.name }}</h2>
             <div class="wrapper"><img src="{{ image.sm.url }}" /></div>
             <ul>
-              {% for size, image in image.todict.items %}
-                <li><a href="{{ image.url }}">{{ size }}</a></li>
+              {% for name, image in image.all.items %}
+                <li><a href="{{ image.url }}">{{ name }}</a></li>
               {% endfor %}
             </ul>
           </div>

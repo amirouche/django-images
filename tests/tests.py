@@ -9,7 +9,6 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from django_images.image import save
 from django_images.forms import ImageForm
-from django_images.forms import ImageFixedFormatForm
 
 
 class TestDjangoImages(TestCase):

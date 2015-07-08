@@ -3,9 +3,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 
-from .views import generic
-from .views import fixed
-from .views import index
+from gallery.views import add
+from gallery.views import index
 
 
 urlpatterns = patterns(
@@ -15,8 +14,7 @@ urlpatterns = patterns(
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url('^generic/$', generic),
-    url('^fixed/$', fixed),
+    url('^add/$', add),
     url('^$', index),
 ) + static(
     settings.STATIC_URL,

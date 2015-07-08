@@ -109,27 +109,5 @@ IMAGE_FORMATS = {
                 "method": "contain"
             }
         }
-    },
-    "5": {
-        "folder": "validation",
-        "display": "Validation",
-        "sizes": {
-            "xs": {
-                "size": [600, 600],
-                "method": "cover"
-            },
-            "sm": {
-                "size": [650, 200],
-                "method": "width"
-            },
-            "md": {
-                "size": [200, 650],
-                "method": "height"
-            },
-            "lg": {
-                "size": [700, 700],
-                "method": "contain"
-            }
-        }
     }
 }
