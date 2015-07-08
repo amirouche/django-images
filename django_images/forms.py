@@ -81,6 +81,7 @@ class ImageForm(forms.Form):
                 return True
             else:
                 self.add_error('image', message)
+                return False
 
 
 class ImageFixedFormatForm(forms.Form):
@@ -104,3 +105,4 @@ class ImageFixedFormatForm(forms.Form):
                 return True
             else:
                 self.add_error('image', message)
+                return False
