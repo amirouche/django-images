@@ -50,16 +50,12 @@ def validate(image, ptype):
             fd = image.file.buffer.raw
     else:
         fd = image
-    close_method = fd.close
-    fd.close = lambda *args, **kwargs: None
-    # do validation against the constraint
     image = Image.open(fd)
     if constraint > image.size:
         return False, constraint
     else:
         # XXX: It's ok, reset image position and close method
         fd.seek(0)
-        fd.close = close_method
         return True, None
 
 
