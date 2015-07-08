@@ -4,9 +4,6 @@ import sys
 from PIL import Image
 from django import forms
 
-from resizeimage import resizeimage
-from resizeimage.imageexceptions import ImageSizeError
-
 from .models import IMAGE_CHOICES
 from .settings import IMAGE_FORMATS
 
@@ -20,15 +17,25 @@ else:
 def validate(image, ptype):
     # compute max constraint size with method
     formats = IMAGE_FORMATS[ptype]
-    maximum = list(formats['sizes'].values())[0]['size']
-    method = list(formats['sizes'].values())[0]['method']
-    for value in list(formats['sizes'].values())[1:]:
-        size = max(maximum, value['size'])
-        if size != maximum:
-            method = value['method']
-            maximum = size
-    method = 'resize_' + method
-    method = getattr(resizeimage, method)
+    widths = list()
+    heights = list()
+    for value in formats['sizes'].values():
+        width, height = value['size']
+        method = value['method']
+        if method in ('contain', 'thumbnail'):
+            pass  # no constraint
+        elif method == 'cover':
+            widths.append(width)
+            heights.append(height)
+        elif method == 'width':
+            widths.append(width)
+        elif method == 'height':
+            heights.append(height)
+        elif method == 'crop':
+            widths.append(width)
+            heights.append(height)
+
+    constraint = (max(widths), max(heights))
 
     # XXX: monkey patch close method
     # so that PIL doesn't really close the file
@@ -45,13 +52,10 @@ def validate(image, ptype):
         fd = image
     close_method = fd.close
     fd.close = lambda *args, **kwargs: None
-    try:
-        # do validation against the max constraint
-        with Image.open(fd) as pil_image:
-            method.validate(pil_image, maximum)
-    except ImageSizeError as exc:
-        # the image doesn't satisfy the constraint.
-        return False, exc.message
+    # do validation against the constraint
+    image = Image.open(fd)
+    if constraint > image.size:
+        return False, constraint
     else:
         # XXX: It's ok, reset image position and close method
         fd.seek(0)
@@ -100,9 +104,11 @@ class ImageFixedFormatForm(forms.Form):
         else:
             image = self.clean()['image']
             ptype = self.ptype
-            ok, message = validate(image, str(ptype))
+            ok, constraint = validate(image, str(ptype))
             if ok:
                 return True
             else:
-                self.add_error('image', message)
+                msg = 'Image is too small, size: {}, required: {}'
+                msg = msg.format(*constraint)
+                self.add_error('image', msg)
                 return False
