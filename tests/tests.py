@@ -14,6 +14,32 @@ from django_images.forms import ImageFixedFormatForm
 
 class TestDjangoImages(TestCase):
 
+    def test_validation(self):
+        """Test that validation let a correct image passthrough a complex
+        ptype"""
+        filepath = os.path.join(settings.BASE_DIR, 'middle.jpeg')
+
+        with open(filepath) as f:
+            # prepare form data
+            image = InMemoryUploadedFile(
+                f,
+                'image',
+                'middle.jpeg',
+                'image/jpeg',
+                42,  # not significant for the test
+                'utf-8'
+            )
+            files = MultiValueDict()
+            files['image'] = image
+            post = MultiValueDict()
+            post['ptype'] = 1
+            post['name'] = 'test with middle.jpeg'
+
+            # create form
+            form = ImageForm(post, files)
+            # validate resize operation
+            self.assertTrue(form.is_valid())
+
     def test_resize_big_image_in_background_format(self):
         """Test resizing of big enough image to background format"""
         filepath = os.path.join(settings.BASE_DIR, 'big.jpeg')
