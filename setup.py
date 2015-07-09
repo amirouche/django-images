@@ -13,7 +13,7 @@ except IOError:
 
 setup(
     name='django-images',
-    version='0.1',
+    version='1.0',
     description='Upload, resize and save images in Django',
     long_description=README,
     url='https://github.com/VingtCinq/django-images',
