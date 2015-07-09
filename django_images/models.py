@@ -60,6 +60,9 @@ class Specification(object):
         return '<Specification class:%s name:%s>' % (self.klass, self.name)
 
     def __get__(self, model, cls=None):
+        """Retrieve the infos dictionary for this image. Since the returned
+        value is cached, make sure the model is properly setup before accessing
+        `SIZES` attributes."""
         if model is None:
             # `Specification` instance is accessed through a class
             return self
@@ -171,7 +174,13 @@ class Image(models.Model):
             # resize image
             method = 'resize_%s' % spec.method
             method = getattr(resizeimage, method)
-            resized = method(image, spec.size, validate=False)
+            # Don't add `validate=False` if the method doesn't support
+            # validation
+            # FIXME: should be fixed in python-resize-image
+            if hasattr(method, 'validate'):
+                resized = method(image, spec.size, validate=False)
+            else:
+                resized = method(image, spec.size)
             # cache infos
             filepath = "%s_%s.%s" % (
                 uid,
@@ -187,11 +196,12 @@ class Image(models.Model):
             # store
             store(resized, filepath)
         model.save()
+        return model
 
     def delete(self):
         """Delete generated images from the storage backend"""
         super(Image, self).delete()
-        for url in map(self.relative_url, SIZES):
+        for url in [getattr(self, x)['filepath'] for x in SIZES]:
             default_storage.delete(url)
 
     def all(self):
