@@ -70,8 +70,9 @@ class Specification(object):
             try:
                 return getattr(model, self.name + '_cache')
             except AttributeError:
+                IMAGES_URL = getattr(settings, 'IMAGES_URL', settings.MEDIA_URL)
                 value = loads(getattr(model, 'json_' + self.name))
-                value['url'] = settings.MEDIA_URL + value['filepath']
+                value['url'] = IMAGES_URL + value['filepath']
                 setattr(model, self.name + '_cache', value)
                 return value
 
@@ -203,7 +204,8 @@ class Image(models.Model):
             default_storage.delete(url)
 
     def all(self):
-        """Returns all resized images specification plus the original image as a dict"""
+        """Returns all resized images specification plus the original image
+        as a dict"""
         return {x: getattr(self, x) for x in SIZES}
 
 
