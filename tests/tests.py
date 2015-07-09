@@ -61,7 +61,7 @@ class TestDjangoImages(TestCase):
 
             # execute resize operation
             data = form.cleaned_data
-            image = TestImage.create(data['image'])
+            image = TestImage.create(data['image'], 'test image')
 
             for size in ('og', 'lg', 'md', 'sm', 'xs'):
                 filepath = getattr(image, size)['filepath']
@@ -172,7 +172,7 @@ class TestDjangoImages(TestCase):
 
                 # execute resize operation
                 data = form.cleaned_data
-                image = TestImage.create(data['image'])
+                image = TestImage.create(data['image'], 'test image')
                 return image
         # create two times the same image:
         one = create_image()
@@ -207,10 +207,11 @@ class TestDjangoImages(TestCase):
 
                 # execute resize operation
                 data = form.cleaned_data
-                image = TestImage.create(data['image'])
+                image = TestImage.create(data['image'], 'test image')
                 return image
         # create two times the same image:
         one = create_image()
+        print(one.og)
         self.assertTrue(default_storage.exists(one.og['filepath']))
         one.delete()
         self.assertFalse(default_storage.exists(one.og['filepath']))

@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
             name='Image',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=255)),
                 ('kind', models.CharField(max_length=255)),
                 ('uid', models.CharField(max_length=255)),
                 ('json_xs', models.TextField()),

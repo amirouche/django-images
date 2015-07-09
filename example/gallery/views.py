@@ -19,7 +19,7 @@ def add(request):
         form = ImageForm(BackgroundImage.specs(), request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
-            BackgroundImage.create(data['image'])
+            BackgroundImage.create(data['image'], data['name'])
             return redirect('/')
     else:
         form = ImageForm(BackgroundImage.specs())

@@ -14,6 +14,7 @@ class ImageForm(forms.Form):
     """Validate that the given image can be resized"""
 
     image = forms.FileField()
+    name = forms.CharField()
 
     def __init__(self, specs, *args, **kwargs):
         self.specs = specs

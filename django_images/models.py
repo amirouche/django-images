@@ -13,6 +13,7 @@ from collections import namedtuple
 
 from django.db import models
 from django.conf import settings
+from django.utils.text import slugify
 from django.core.files.storage import default_storage
 
 from resizeimage import resizeimage
@@ -86,6 +87,7 @@ def store(pil_image, filepath):
 
 class Image(models.Model):
     """Manage all images for the application"""
+    name = models.CharField(max_length=255)
     kind = models.CharField(max_length=255)
     uid = models.CharField(max_length=255)
 
@@ -125,7 +127,7 @@ class Image(models.Model):
             return cls._specs
 
     @classmethod
-    def create(cls, image):
+    def create(cls, image, name):
         """Save original image `image` and generate resized images.
 
         Return a `Image` instance for the image"""
@@ -142,11 +144,15 @@ class Image(models.Model):
         # prepare django Image model instance
         model = cls()
         model.kind = cls.__name__
+        model.name = name
 
         # generate unique identifier uid
         while True:
             uid = uuid4().hex
             filepath = "%s.%s" % (uid, image.format.lower())
+            filepath = slugify(model.name) + '-' + filepath
+            folder = model.kind
+            filepath = folder + '/' + filepath
             # if the original file doesn't exists
             # it means we have a valid uid
             if not default_storage.exists(filepath):
@@ -154,6 +160,7 @@ class Image(models.Model):
         model.uid = uid
 
         # cache infos
+
         infos = dict(
             width=image.size[0],
             heigth=image.size[1],
@@ -186,6 +193,10 @@ class Image(models.Model):
                 spec.name,
                 resized.format.lower()
             )
+            filepath = slugify(model.name) + '-' + filepath
+            folder = model.kind
+            filepath = folder + '/' + filepath
+
             infos = dict(
                 width=resized.size[0],
                 heigth=resized.size[1],
