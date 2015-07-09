@@ -16,7 +16,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('kind', models.CharField(max_length=255)),
                 ('uid', models.CharField(max_length=255)),
-                ('ext', models.CharField(max_length=5)),
                 ('json_xs', models.TextField()),
                 ('json_sm', models.TextField()),
                 ('json_md', models.TextField()),

@@ -73,7 +73,6 @@ class TestDjangoImages(TestCase):
         from django_images.models import Image
         image = TestImage(
             uid='42',
-            ext='ext',
             json_xs=dumps(dict(
                 width=100,
                 height=100,

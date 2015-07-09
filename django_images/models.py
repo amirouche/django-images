@@ -87,7 +87,6 @@ class Image(models.Model):
     """Manage all images for the application"""
     kind = models.CharField(max_length=255)
     uid = models.CharField(max_length=255)
-    ext = models.CharField(max_length=5)
 
     json_xs = models.TextField()
     json_sm = models.TextField()
@@ -142,7 +141,6 @@ class Image(models.Model):
         # prepare django Image model instance
         model = cls()
         model.kind = cls.__name__
-        model.ext = image.format.lower()
 
         # generate unique identifier uid
         while True:
