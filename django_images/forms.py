@@ -16,11 +16,12 @@ class ImageForm(forms.Form):
     image = forms.FileField()
     name = forms.CharField()
 
-    def __init__(self, specs, *args, **kwargs):
-        self.specs = specs
+    def __init__(self, model, *args, **kwargs):
+        self.model = model
         super(ImageForm, self).__init__(*args, **kwargs)
 
     def is_valid(self):
+        specs = self.model.specs()
         if not super(ImageForm, self).is_valid():
             return False
         else:
@@ -30,7 +31,7 @@ class ImageForm(forms.Form):
             # compute max constraint size with method
             widths = [0]
             heights = [0]
-            for value in self.specs:
+            for value in specs:
                 if value.method in ('contain', 'thumbnail'):
                     pass  # no constraint
                 elif value.method == 'cover':
@@ -68,3 +69,6 @@ class ImageForm(forms.Form):
                 # It's ok, reset image position
                 fd.seek(0)
                 return True
+
+    def save(self):
+        return self.model.create(**self.cleaned_data)

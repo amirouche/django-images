@@ -11,14 +11,12 @@
 
 #images {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     flex-wrap: wrap;
 }
 
 div.thumbnail .wrapper {
-    height: 230px;
-    width: 350px;
-
+    height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;

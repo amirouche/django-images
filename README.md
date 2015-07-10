@@ -5,9 +5,9 @@ A simple django app to upload images, resize them and save them into s3 via djan
 
 ## Dependencies
 
-- Pillow 2.7++
+- Pillow 2.7+
 - Python 2.7/3.4
-- [python-image-resize](https://github.com/VingtCinq/python-resize-image) 1.1.3++
+- [python-image-resize](https://github.com/VingtCinq/python-resize-image) 1.1.3+
 
 
 ## Settings
@@ -26,12 +26,12 @@ Install [django-storages-redux](https://pypi.python.org/pypi/django-storages-red
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 ```
 
-And provide you S3 credentials:
+And provide the S3 credentials:
 
 ```python
 AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''
-AWS_STORAGE_BUCKET_NAME = '
+AWS_STORAGE_BUCKET_NAME = ''
 ```
 
 ## Usage
@@ -62,7 +62,7 @@ The proxy model allows to do two things:
 
 In the view you have to:
 
-- Use `django_images.forms.ImageForm(specs, post, files)` to validate images. `ImageForm` will make sure that the image can be resized by *python-image-resize* and saved as the given proxy `Image` model.
+- Use `django_images.forms.ImageForm(ImageProxyModel, post, files)` to validate images. `ImageForm` will make sure that the image can be resized by *python-image-resize* and saved as the given proxy `Image` model.
 
 - Use `Image.create(image, name)` to save it with the proxy model you want the image to be associated with, in this case it's `BackgroundImage.create` that must be called.
 
@@ -71,30 +71,32 @@ def add(request):
     """Submit image using form"""
     if request.method == 'POST':
         # Create form to validate the image
-        form = ImageForm(BackgroundImage.specs(), request.POST, request.FILES)
+        form = ImageForm(BackgroundImage, request.POST, request.FILES)
 
         if form.is_valid():
-            data = form.cleaned_data
-            # Image is valid for the resize, save that image in storage and cache
-            # its infos in the database
-            BackgroundImage.create(data['image'], data['name'])
+            # Image is valid for the resize, resize it, save in storage
+            # and cache its infos in the database
+            image = form.save()
             return redirect('/')
         else:
         # Create an empty form
-        form = ImageForm(BackgroundImage.specs())
+        form = ImageForm(BackgroundImage)
     return render(request, 'django_images.html', dict(form=form))
 ```
 
-Once you have created a few images, you can access them using their `Image` proxy model, for instance the following code:
+Once you have created a few images, you can access them using their `Image` proxy model.
+
+Retrieve the one `BackgroundImage`:
 
 ```python
-background = BackgroundImage.objects.all()[0]
-print(background.all())
+>>> backgrounds = BackgroundImage.objects.all()
+>>> background = backgrounds[0]
 ```
 
-Will return something like:
+Retrieve all its infos:
 
 ```python
+>>> print(background.all())
 {
     "og": {
         "url": "https://s3-eu-west-1.amazonaws.com/django-images/BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb.jpeg", 
@@ -129,7 +131,18 @@ Will return something like:
 }
 ```
 
-You can access this data size by size using ``backgroudn.xs``, ``background.lg`` and so on...
+You can access this data size by size using ``backgroudn.xs``, ``background.md`` and so on... `background.og` is the info for
+the original image file, for instance:
+
+```python
+>>> background.og
+{
+    "url": "https://s3-eu-west-1.amazonaws.com/django-images/BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb.jpeg", 
+    "width": 4288, 
+    "heigth": 2848, 
+    "filepath": "BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb.jpeg"
+}
+```
 
 `url` field is computed dynamically using `IMAGES_URL` or `MEDIA_URL` django settings.
 

@@ -16,10 +16,9 @@ def index(request):
 def add(request):
     """Submit image using form"""
     if request.method == 'POST':
-        form = ImageForm(BackgroundImage.specs(), request.POST, request.FILES)
+        form = ImageForm(BackgroundImage, request.POST, request.FILES)
         if form.is_valid():
-            data = form.cleaned_data
-            BackgroundImage.create(data['image'], data['name'])
+            form.save()
             return redirect('/')
     else:
         form = ImageForm(BackgroundImage.specs())

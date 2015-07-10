@@ -3,6 +3,7 @@ from json import dumps
 
 from django.conf import settings
 from django.test import TestCase
+from django_images.models import Image
 from django.core.files.storage import default_storage
 from django.utils.datastructures import MultiValueDict
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -31,8 +32,9 @@ class TestDjangoImages(TestCase):
             files = MultiValueDict()
             files['image'] = image
             post = MultiValueDict()
+            post['name'] = 'test image'
             # create form
-            form = ImageForm(TestImage.specs(), post, files)
+            form = ImageForm(TestImage, post, files)
             # validate resize operation
             v = form.is_valid()
             self.assertTrue(v)
@@ -54,14 +56,14 @@ class TestDjangoImages(TestCase):
             files = MultiValueDict()
             files['image'] = image
             post = MultiValueDict()
+            post['name'] = 'test image'
             # create form
-            form = ImageForm(TestImage.specs(), post, files)
+            form = ImageForm(TestImage, post, files)
             # validate resize operation
             self.assertTrue(form.is_valid())
 
             # execute resize operation
-            data = form.cleaned_data
-            image = TestImage.create(data['image'], 'test image')
+            image = form.save()
 
             for size in ('og', 'lg', 'md', 'sm', 'xs'):
                 filepath = getattr(image, size)['filepath']
@@ -70,7 +72,6 @@ class TestDjangoImages(TestCase):
 
     def test_model_api(self):
         """Test that Image model behave correctly"""
-        from django_images.models import Image
         image = TestImage(
             uid='42',
             json_xs=dumps(dict(
@@ -142,7 +143,7 @@ class TestDjangoImages(TestCase):
             post['name'] = 'test with small.jpeg'
 
             # create form
-            form = ImageForm(post, files)
+            form = ImageForm(TestImage, post, files)
 
             # validate resize operation
             self.assertFalse(form.is_valid())
@@ -165,14 +166,14 @@ class TestDjangoImages(TestCase):
                 files = MultiValueDict()
                 files['image'] = image
                 post = MultiValueDict()
+                post['name'] = 'test image'
                 # create form
-                form = ImageForm(TestImage.specs(), post, files)
+                form = ImageForm(TestImage, post, files)
                 # validate resize operation
                 form.is_valid()
 
                 # execute resize operation
-                data = form.cleaned_data
-                image = TestImage.create(data['image'], 'test image')
+                image = form.save()
                 return image
         # create two times the same image:
         one = create_image()
@@ -201,17 +202,15 @@ class TestDjangoImages(TestCase):
                 post['name'] = 'test with big.jpeg'
 
                 # create form
-                form = ImageForm(TestImage.specs(), post, files)
+                form = ImageForm(TestImage, post, files)
                 # validate resize operation
                 form.is_valid()
 
                 # execute resize operation
-                data = form.cleaned_data
-                image = TestImage.create(data['image'], 'test image')
+                image = form.save()
                 return image
         # create two times the same image:
         one = create_image()
-        print(one.og)
         self.assertTrue(default_storage.exists(one.og['filepath']))
         one.delete()
         self.assertFalse(default_storage.exists(one.og['filepath']))
