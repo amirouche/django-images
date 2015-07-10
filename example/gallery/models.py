@@ -9,10 +9,10 @@ class BackgroundImage(Image):
     class Meta:
         proxy = True
 
-    xs = Specification(method='width', size=100)
-    sm = Specification(method='width', size=300)
-    md = Specification(method='width', size=600)
-    lg = Specification(method='width', size=1000)
+    xs = Specification(method='contain', size=(100, 100))
+    sm = Specification(method='height', size=300)
+    md = Specification(method='width', size=300)
+    lg = Specification(method='cover', size=(1000, 1000))
 
 
 class Logo(Image):
@@ -27,7 +27,6 @@ class Logo(Image):
 
 
 # Example of foreign key use
-
 
 class Vitrine(models.Model):
 
