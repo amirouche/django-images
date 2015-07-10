@@ -29,15 +29,21 @@ class BackgroundImage(Image):
 
 ```
 
-This specify how an image will be resized by [python-image-resize](https://github.com/VingtCinq/python-resize-image).
+The proxy model allows to do two things:
 
-Inside your view you have to use `django_images.forms.ImageForm` to validate an image before saving it with the the proxy model you want the image to be associated with, in this case `BackgroudnImage.create`:
+- Specify how an image will be resized by [python-image-resize](https://github.com/VingtCinq/python-resize-image).
+- Which folder the image will be stored in. In this example images will be stored in `BackgroundImage` folder.
+
+In the view you have to:
+
+- Use `django_images.forms.ImageForm(specs, post, files)` to validate images. `ImageForm` will make sure that the image can be resized by *python-image-resize* and saved as the given proxy `Image` model.
+- Use `Image.create(image, name)` to save it with the the  proxy model you want the image to be associated with, in this case it's `BackgroundImage.create` that must be called.
 
 ```python
 def add(request):
     """Submit image using form"""
     if request.method == 'POST':
-        # Create form for validating this image
+        # Create form to validate the image
         form = ImageForm(BackgroundImage.specs(), request.POST, request.FILES)
 
         if form.is_valid():
@@ -52,51 +58,53 @@ def add(request):
     return render(request, 'django_images.html', dict(form=form))
 ```
 
-Once you have created a few pictures, you can access them using `Picture` model, for instance the following code:
+Once you have created a few images, you can access them using their `Image` proxy model, for instance the following code:
 
 ```python
-background = BackgroundImage.objects.all().all()[0]
+background = BackgroundImage.objects.all()[0]
+print(background.all())
 ```
 
-Will return:
+Will return something like:
 
 ```python
 {
-    'og': {
-        u'url': u'/media/1001142f313e40bbb4ad2490d1ffbaef.jpeg',
-        u'width': 5760,
-        u'heigth': 3840,
-        u'filepath': u'1001142f313e40bbb4ad2490d1ffbaef.jpeg'
-    },
-    'xs': {
-        u'url': u'/media/1001142f313e40bbb4ad2490d1ffbaef_xs.jpeg',
-        u'width': 100,
-        u'heigth': 66,
-        u'filepath': u'1001142f313e40bbb4ad2490d1ffbaef_xs.jpeg'
-    },
-    'lg': {
-        u'url': u'/media/1001142f313e40bbb4ad2490d1ffbaef_lg.jpeg',
-        u'width': 1000,
-        u'heigth': 666,
-        u'filepath': u'1001142f313e40bbb4ad2490d1ffbaef_lg.jpeg'
-    },
-    'sm': {
-        u'url': u'/media/1001142f313e40bbb4ad2490d1ffbaef_sm.jpeg',
-        u'width': 300,
-        u'heigth': 200,
-        u'filepath': u'1001142f313e40bbb4ad2490d1ffbaef_sm.jpeg'
-    },
-    'md': {
-        u'url': u'/media/1001142f313e40bbb4ad2490d1ffbaef_md.jpeg',
-        u'width': 600,
-        u'heigth': 400,
-        u'filepath': u'1001142f313e40bbb4ad2490d1ffbaef_md.jpeg'
+    "og": {
+        "url": "https://s3-eu-west-1.amazonaws.com/django-images/BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb.jpeg", 
+        "width": 4288, 
+        "heigth": 2848, 
+        "filepath": "BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb.jpeg"
+    }, 
+    "xs": {
+        "url": "https://s3-eu-west-1.amazonaws.com/django-images/BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb_xs.jpeg", 
+        "width": 100, 
+        "heigth": 66, 
+        "filepath": "BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb_xs.jpeg"
+    }, 
+    "lg": {
+        "url": "https://s3-eu-west-1.amazonaws.com/django-images/BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb_lg.jpeg", 
+        "width": 400, 
+        "heigth": 265, 
+        "filepath": "BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb_lg.jpeg"
+    }, 
+    "sm": {
+        "url": "https://s3-eu-west-1.amazonaws.com/django-images/BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb_sm.jpeg", 
+        "width": 200, 
+        "heigth": 132, 
+        "filepath": "BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb_sm.jpeg"
+    }, 
+    "md": {
+        "url": "https://s3-eu-west-1.amazonaws.com/django-images/BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb_md.jpeg", 
+        "width": 300, 
+        "heigth": 199, 
+        "filepath": "BackgroundImage/beach-de3ce50519e241fb9696631727eff8cb_md.jpeg"
     }
 }
-
 ```
 
 You can access this data size by size using ``backgroudn.xs``, ``background.lg`` and so on...
+
+`url` field is computed dynamically using `IMAGES_URL` or `MEDIA_URL` django settings.
 
 The gist of this application is the ability to create images with size fine-tuned for your (bootstrap) template
 without having to worry about the code behind it. Pass the image instance to the template and depending
