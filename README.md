@@ -8,6 +8,24 @@ A simple django app to upload images, resize them and save them into s3 via djan
 - Python 2.7/3.4
 - [python-image-resize](https://github.com/VingtCinq/python-resize-image) 1.1.3++
 
+## Working with Amazon Storage (AWS S3)
+
+Install [django-storages-redux](https://pypi.python.org/pypi/django-storages-redux/1.2) and
+[boto](https://pypi.python.org/pypi/boto), then add `'storages'` to ``INSTALLED_APPS``. Specify
+`DEFAULT_FILE_STORAGE`:
+
+```python
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+```
+
+And provide you S3 credentials:
+
+```python
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_STORAGE_BUCKET_NAME = '
+```
+
 ## Usage
 
 To make use of django images you need to setup a **proxy model** like the following:
