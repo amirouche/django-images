@@ -88,7 +88,7 @@ def store(pil_image, filepath):
 class Image(models.Model):
     """Manage all images for the application"""
     name = models.CharField(max_length=255)
-    kind = models.CharField(max_length=255)
+    format = models.CharField(max_length=255)
     uid = models.CharField(max_length=255)
 
     json_xs = models.TextField()
@@ -114,6 +114,11 @@ class Image(models.Model):
 
     def __unicode__(self):
         return str(self.pk)
+
+    @classmethod
+    def formats(cls):
+        """Return the list of all the models"""
+        return cls.__subclasses__()
 
     @classmethod
     def specs(cls):
@@ -194,8 +199,7 @@ class Image(models.Model):
                 resized.format.lower()
             )
             filepath = slugify(model.name) + '-' + filepath
-            folder = model.kind
-            filepath = folder + '/' + filepath
+            filepath = model.folder() + '/' + filepath
 
             infos = dict(
                 width=resized.size[0],
@@ -207,6 +211,14 @@ class Image(models.Model):
             store(resized, filepath)
         model.save()
         return model
+
+    @property
+    def verbose(self):
+        return type(self).__name__
+
+    @property
+    def folder(self):
+        return type(self).__name__
 
     def delete(self):
         """Delete generated images from the storage backend"""
