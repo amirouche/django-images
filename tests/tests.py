@@ -1,18 +1,43 @@
 import os
-from django.test import TestCase
+from json import dumps
 
 from django.conf import settings
-from django.utils.text import slugify
+from django.test import TestCase
+from django_images.models import Image
 from django.core.files.storage import default_storage
 from django.utils.datastructures import MultiValueDict
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from django_images.image import save
 from django_images.forms import ImageForm
-from django_images.forms import ImageFixedFormatForm
+
+from .models import TestImage
 
 
 class TestDjangoImages(TestCase):
+
+    def test_validation(self):
+        """Validate an image against a complex format"""
+        filepath = os.path.join(settings.BASE_DIR, 'middle.jpeg')
+
+        with open(filepath) as f:
+            # prepare form data
+            image = InMemoryUploadedFile(
+                f,
+                'image',
+                'middle.jpeg',
+                'image/jpeg',
+                42,  # not significant for the test
+                'utf-8'
+            )
+            files = MultiValueDict()
+            files['image'] = image
+            post = MultiValueDict()
+            post['name'] = 'test image'
+            # create form
+            form = ImageForm(TestImage, post, files)
+            # validate resize operation
+            v = form.is_valid()
+            self.assertTrue(v)
 
     def test_resize_big_image_in_background_format(self):
         """Test resizing of big enough image to background format"""
@@ -31,96 +56,70 @@ class TestDjangoImages(TestCase):
             files = MultiValueDict()
             files['image'] = image
             post = MultiValueDict()
-            post['ptype'] = 1
-            post['name'] = 'test with big.jpeg'
-
+            post['name'] = 'test image'
             # create form
-            form = ImageForm(post, files)
+            form = ImageForm(TestImage, post, files)
             # validate resize operation
             self.assertTrue(form.is_valid())
 
             # execute resize operation
-            data = form.cleaned_data
-            filename = slugify(data['name'])
-            image = save(data['image'], filename, data['ptype'])
+            image = form.save()
 
             for size in ('og', 'lg', 'md', 'sm', 'xs'):
-                filepath = image.relativeurl(size)
-                filepath = os.path.join(settings.MEDIA_ROOT, filepath)
-                self.assertTrue(os.path.exists(filepath))
-
-    def test_form_fixed_format_form(self):
-        """Test resizing of big enough image to background format"""
-        filepath = os.path.join(settings.BASE_DIR, 'big.jpeg')
-
-        with open(filepath) as f:
-            # prepare form data
-            image = InMemoryUploadedFile(
-                f,
-                'image',
-                'big.jpeg',
-                'image/jpeg',
-                42,  # not significant for the test
-                'utf-8'
-            )
-            files = MultiValueDict()
-            files['image'] = image
-            post = MultiValueDict()
-
-            # create form
-            form = ImageFixedFormatForm('1', 'test', post, files)
-
-            # validate resize operation
-            self.assertTrue(form.is_valid())
-
-            # execute resize operation
-            data = form.cleaned_data
-            filename = slugify(form.name)
-            image = save(data['image'], filename, form.ptype)
-
-            for size in ('og', 'lg', 'md', 'sm', 'xs'):
-                filepath = image.relativeurl(size)
+                filepath = getattr(image, size)['filepath']
                 filepath = os.path.join(settings.MEDIA_ROOT, filepath)
                 self.assertTrue(os.path.exists(filepath))
 
     def test_model_api(self):
         """Test that Image model behave correctly"""
-        from django_images.models import Image
-        image = Image(
-            ptype='1',
-            name='test image model',
+        image = TestImage(
             uid='42',
-            ext='ext',
-            xs_width=100,
-            xs_height=100,
-            sm_width=200,
-            sm_height=200,
-            md_width=300,
-            md_height=300,
-            lg_width=400,
-            lg_height=400,
-            og_width=1000,
-            og_height=1000,
+            json_xs=dumps(dict(
+                width=100,
+                height=100,
+                filepath='42_xs.ext',
+            )),
+            json_sm=dumps(dict(
+                width=100,
+                height=100,
+                filepath='42_sm.ext',
+            )),
+            json_md=dumps(dict(
+                width=100,
+                height=100,
+                filepath='42_md.ext',
+            )),
+            json_lg=dumps(dict(
+                width=100,
+                height=100,
+                filepath='42_lg.ext',
+            )),
+            json_og=dumps(dict(
+                width=100,
+                height=100,
+                filepath='42.ext',
+            ))
         )
+
         self.assertEqual(
             image.xs['url'],
-            'http://example.com/media/covers/42_100x100.ext'
+            'http://example.com/media/42_xs.ext'
         )
         self.assertEqual(
             image.sm['url'],
-            'http://example.com/media/covers/42_200x200.ext'
+            'http://example.com/media/42_sm.ext'
         )
         self.assertEqual(
             image.md['url'],
-            'http://example.com/media/covers/42_300x300.ext'
+            'http://example.com/media/42_md.ext'
         )
         self.assertEqual(
             image.lg['url'],
-            'http://example.com/media/covers/42_400x400.ext'
+            'http://example.com/media/42_lg.ext'
         )
         self.assertEqual(
             image.og['url'],
-            'http://example.com/media/covers/42_1000x1000.ext'
+            'http://example.com/media/42.ext'
         )
 
     def test_fail_to_resize_small_image_in_background_format(self):
@@ -144,7 +143,7 @@ class TestDjangoImages(TestCase):
             post['name'] = 'test with small.jpeg'
 
             # create form
-            form = ImageForm(post, files)
+            form = ImageForm(TestImage, post, files)
 
             # validate resize operation
             self.assertFalse(form.is_valid())
@@ -167,18 +166,14 @@ class TestDjangoImages(TestCase):
                 files = MultiValueDict()
                 files['image'] = image
                 post = MultiValueDict()
-                post['ptype'] = 1
-                post['name'] = 'test with big.jpeg'
-
+                post['name'] = 'test image'
                 # create form
-                form = ImageForm(post, files)
+                form = ImageForm(TestImage, post, files)
                 # validate resize operation
                 form.is_valid()
 
                 # execute resize operation
-                data = form.cleaned_data
-                filename = slugify(data['name'])
-                image = save(data['image'], filename, data['ptype'])
+                image = form.save()
                 return image
         # create two times the same image:
         one = create_image()
@@ -207,17 +202,15 @@ class TestDjangoImages(TestCase):
                 post['name'] = 'test with big.jpeg'
 
                 # create form
-                form = ImageForm(post, files)
+                form = ImageForm(TestImage, post, files)
                 # validate resize operation
                 form.is_valid()
 
                 # execute resize operation
-                data = form.cleaned_data
-                filename = slugify(data['name'])
-                image = save(data['image'], filename, data['ptype'])
+                image = form.save()
                 return image
         # create two times the same image:
         one = create_image()
-        self.assertTrue(default_storage.exists(one.relativeurl('og')))
+        self.assertTrue(default_storage.exists(one.og['filepath']))
         one.delete()
-        self.assertFalse(default_storage.exists(one.relativeurl('og')))
+        self.assertFalse(default_storage.exists(one.og['filepath']))

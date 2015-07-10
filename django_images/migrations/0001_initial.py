@@ -15,19 +15,49 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=255)),
-                ('ptype', models.SmallIntegerField(choices=[[1, b'Background image'], [3, b'Picto'], [2, b'Content image'], [4, b'Logo']])),
+                ('kind', models.CharField(max_length=255)),
                 ('uid', models.CharField(max_length=255)),
-                ('ext', models.CharField(max_length=5)),
-                ('xs_width', models.SmallIntegerField()),
-                ('xs_height', models.SmallIntegerField()),
-                ('sm_width', models.SmallIntegerField()),
-                ('sm_height', models.SmallIntegerField()),
-                ('md_width', models.SmallIntegerField()),
-                ('md_height', models.SmallIntegerField()),
-                ('lg_width', models.SmallIntegerField()),
-                ('lg_height', models.SmallIntegerField()),
-                ('og_width', models.SmallIntegerField()),
-                ('og_height', models.SmallIntegerField()),
+                ('json_xs', models.TextField()),
+                ('json_sm', models.TextField()),
+                ('json_md', models.TextField()),
+                ('json_lg', models.TextField()),
+                ('json_og', models.TextField()),
             ],
+        ),
+        migrations.CreateModel(
+            name='ContentImage',
+            fields=[
+            ],
+            options={
+                'proxy': True,
+            },
+            bases=('django_images.image',),
+        ),
+        migrations.CreateModel(
+            name='CoverImage',
+            fields=[
+            ],
+            options={
+                'proxy': True,
+            },
+            bases=('django_images.image',),
+        ),
+        migrations.CreateModel(
+            name='LogoImage',
+            fields=[
+            ],
+            options={
+                'proxy': True,
+            },
+            bases=('django_images.image',),
+        ),
+        migrations.CreateModel(
+            name='PictoImage',
+            fields=[
+            ],
+            options={
+                'proxy': True,
+            },
+            bases=('django_images.image',),
         ),
     ]

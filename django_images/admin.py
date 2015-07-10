@@ -1,18 +1,13 @@
 from django.contrib import admin
 
-from .models import Image
-
 
 def size_display_factory(size):
-    """Create a function to use an a model field display in the admin list"""
+    """Create a function to use in as model field display in the admin list"""
     def getter(model):
         infos = getattr(model, size)
         html = '<a href="%s">%s</a>'
-        label = '%sx%s' % (infos['width'], infos['height'])
-        html = html % (
-            model.url(size),
-            label
-        )
+        label = '%sx%s' % (infos['width'], infos['heigth'])
+        html = html % (infos['url'], label)
         return html
     getter.__name__ = size
     getter.allow_tags = True
@@ -23,7 +18,7 @@ def size_display_factory(size):
 class ImageAdmin(admin.ModelAdmin):
     """Custom admin for Image model"""
 
-    list_display = ['preview', 'name', 'xs', 'sm', 'md', 'lg', 'og']
+    list_display = ['preview', 'xs', 'sm', 'md', 'lg', 'og']
 
     def __init__(self, *args, **kwargs):
         for size in ['xs', 'sm', 'md', 'lg', 'og']:
@@ -33,11 +28,6 @@ class ImageAdmin(admin.ModelAdmin):
 
     def preview(self, model):
         """Display the image in the smallest size"""
-        html = '<img src="%s" alt="%s"/>' % (
-            model.xs['url'],
-            model.name
-        )
+        html = '<img src="%s"/>' % model.xs['url']
         return html
     preview.allow_tags = True
-
-admin.register(Image)(ImageAdmin)
