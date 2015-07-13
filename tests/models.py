@@ -11,3 +11,11 @@ class TestImage(Image):
     sm = Specification(method='width', size=600)
     md = Specification(method='cover', size=(500, 500))
     lg = Specification(method='contain', size=(700, 700))
+
+    @classmethod
+    def verbose(cls):
+        return 'Test image'
+
+    @classmethod
+    def forlder(cls):
+        return 'test-image'

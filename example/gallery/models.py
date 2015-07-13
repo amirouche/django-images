@@ -14,6 +14,9 @@ class BackgroundImage(Image):
     md = Specification(method='width', size=300)
     lg = Specification(method='cover', size=(1000, 1000))
 
+    verbose = 'Background Image'
+    folder = 'background-image'
+
 
 class Logo(Image):
 
@@ -25,6 +28,9 @@ class Logo(Image):
     md = Specification(method='contain', size=(100, 100))
     lg = Specification(method='contain', size=(400, 400))
 
+    verbose = 'Logo'
+    folder = 'logo'
+
 
 # Example of foreign key use
 
@@ -33,3 +39,8 @@ class Vitrine(models.Model):
     title = models.CharField(max_length=255)
     logo = models.ForeignKey(Logo)
     background = models.ForeignKey(BackgroundImage)
+
+    verbose = 'Vitrine'
+    folder = 'vitrine'
+
+
