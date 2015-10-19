@@ -2,7 +2,9 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 
+from django_images.models import Image
 from django_images.forms import ImageForm
+from django_images.forms import MultipleFormatImageForm
 
 from .models import BackgroundImage
 
@@ -22,4 +24,20 @@ def add(request):
             return redirect('/')
     else:
         form = ImageForm(BackgroundImage.specs())
+    return render(request, 'django_images.html', dict(form=form))
+
+
+def add_multiformats(request):
+    """Submit image using form where format can be chosen"""
+    if request.method == 'POST':
+        form = MultipleFormatImageForm(
+            Image.formats(),
+            request.POST,
+            request.FILES
+        )
+        if form.is_valid():
+            form.save()
+            return redirect('/')
+    else:
+        form = MultipleFormatImageForm(Image.formats())
     return render(request, 'django_images.html', dict(form=form))

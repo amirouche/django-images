@@ -1,3 +1,4 @@
+import re
 import PIL
 import sys
 from uuid import uuid4
@@ -18,6 +19,8 @@ from django.core.files.storage import default_storage
 
 from resizeimage import resizeimage
 
+from helpers import classproperty
+
 
 if sys.version_info > (3, 0):
     PY3 = True
@@ -29,6 +32,9 @@ SIZES = ('xs', 'sm', 'md', 'lg', 'og')
 Specification = namedtuple('Specification', ('method', 'size'))
 
 
+RE_NAME = re.compile('([A-Z][a-z0-9_]+)')
+
+
 class ImageManager(models.Manager):
     """Dynamic manager that filters objects based on the class name
 
@@ -37,8 +43,8 @@ class ImageManager(models.Manager):
     given model appear inside of the django admin list"""
 
     def get_queryset(self):
-        kind = self.model.__name__
-        return super(ImageManager, self).get_queryset().filter(kind=kind)
+        fmt = self.model.__name__
+        return super(ImageManager, self).get_queryset().filter(fmt=fmt)
 
 
 class Specification(object):
@@ -88,7 +94,7 @@ def store(pil_image, filepath):
 class Image(models.Model):
     """Manage all images for the application"""
     name = models.CharField(max_length=255)
-    kind = models.CharField(max_length=255)
+    fmt = models.CharField(max_length=255)
     uid = models.CharField(max_length=255)
 
     json_xs = models.TextField()
@@ -114,6 +120,11 @@ class Image(models.Model):
 
     def __unicode__(self):
         return str(self.pk)
+
+    @classmethod
+    def formats(cls):
+        """Return the list of all the models"""
+        return cls.__subclasses__()
 
     @classmethod
     def specs(cls):
@@ -143,7 +154,7 @@ class Image(models.Model):
         image = PIL.Image.open(fd)
         # prepare django Image model instance
         model = cls()
-        model.kind = cls.__name__
+        model.fmt = cls.__name__
         model.name = name
 
         # generate unique identifier uid
@@ -151,8 +162,7 @@ class Image(models.Model):
             uid = uuid4().hex
             filepath = "%s.%s" % (uid, image.format.lower())
             filepath = slugify(model.name) + '-' + filepath
-            folder = model.kind
-            filepath = folder + '/' + filepath
+            filepath = model.folder + '/' + filepath
             # if the original file doesn't exists
             # it means we have a valid uid
             if not default_storage.exists(filepath):
@@ -194,8 +204,7 @@ class Image(models.Model):
                 resized.format.lower()
             )
             filepath = slugify(model.name) + '-' + filepath
-            folder = model.kind
-            filepath = folder + '/' + filepath
+            filepath = model.folder + '/' + filepath
 
             infos = dict(
                 width=resized.size[0],
@@ -207,6 +216,19 @@ class Image(models.Model):
             store(resized, filepath)
         model.save()
         return model
+
+    @classproperty
+    def verbose(cls):
+        words = RE_NAME.findall(cls.__name__)
+        verbose = words[0] + ' '
+        verbose += ' '.join([e.lower() for e in words[1:]])
+        return verbose
+
+    @classproperty
+    def folder(cls):
+        words = RE_NAME.findall(cls.__name__)
+        folder = '-'.join([e.lower() for e in words])
+        return folder
 
     def delete(self):
         """Delete generated images from the storage backend"""

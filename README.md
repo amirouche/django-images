@@ -2,6 +2,22 @@
 
 A simple django app to upload images, resize them and save them into s3 via django storage facility.
 
+This project is licensed under MIT and developped by [vingtcinq](http://vingtcinq.io) at [github](https://github.com/VingtCinq/django-images).
+
+
+##Installation
+
+Installation from PyPi is as easy as doing:
+
+```
+pip install django-images
+```
+
+Once that is done add `django_images` to your your `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS += ['django_images']
+```
 
 ## Dependencies
 
@@ -12,8 +28,14 @@ A simple django app to upload images, resize them and save them into s3 via djan
 
 ## Settings
 
-If you use custom django storage `IMAGES_URL` must be set as the root url to serve images. If
-`IMAGES_URL` is not set, it will use `MEDIA_URL`. So `ÌMAGES_URL` or `MEDIA_URL` must be set.
+If you use custom django storage `IMAGES_URL` must be set in the project
+``settings.py`` as the root url to serve images. If `IMAGES_URL` is not set,
+it will use `MEDIA_URL`. So `ÌMAGES_URL` or `MEDIA_URL` must be set.
+For instance:
+
+```python
+IMAGES_URL = 'https://s3-eu-west-1.amazonaws.com/django-images/'
+```
 
 
 ## Working with Amazon Storage (AWS S3)
@@ -36,7 +58,7 @@ AWS_STORAGE_BUCKET_NAME = ''
 
 ## Usage
 
-To make use of django images you need to setup a **proxy model** like the following:
+To make use of django-images you need to setup a **proxy model** like the following:
 
 ```python
 from django_images.models import Image
@@ -67,6 +89,11 @@ In the view you have to:
 - Use `Image.create(image, name)` to save it with the proxy model you want the image to be associated with, in this case it's `BackgroundImage.create` that must be called.
 
 ```python
+from django_images.forms import ImageForm
+
+from .models import BackgroundImage
+
+
 def add(request):
     """Submit image using form"""
     if request.method == 'POST':

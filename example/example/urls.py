@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 
 from gallery.views import add
+from gallery.views import add_multiformats
 from gallery.views import index
 
 
@@ -15,6 +16,7 @@ urlpatterns = patterns(
 
     url(r'^admin/', include(admin.site.urls)),
     url('^add/$', add),
+    url('^add-multiformats/$', add_multiformats),
     url('^$', index),
 ) + static(
     settings.STATIC_URL,

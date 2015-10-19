@@ -3,12 +3,13 @@ from json import dumps
 
 from django.conf import settings
 from django.test import TestCase
-from django_images.models import Image
 from django.core.files.storage import default_storage
 from django.utils.datastructures import MultiValueDict
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+from django_images.models import Image
 from django_images.forms import ImageForm
+from django_images.forms import MultipleFormatImageForm
 
 from .models import TestImage
 
@@ -35,6 +36,31 @@ class TestDjangoImages(TestCase):
             post['name'] = 'test image'
             # create form
             form = ImageForm(TestImage, post, files)
+            # validate resize operation
+            v = form.is_valid()
+            self.assertTrue(v)
+
+    def test_multi_format_validation(self):
+        """Validate an image against a complex format"""
+        filepath = os.path.join(settings.BASE_DIR, 'big.jpeg')
+
+        with open(filepath) as f:
+            # prepare form data
+            image = InMemoryUploadedFile(
+                f,
+                'image',
+                'big.jpeg',
+                'image/jpeg',
+                42,  # not significant for the test
+                'utf-8'
+            )
+            files = MultiValueDict()
+            files['image'] = image
+            post = MultiValueDict()
+            post['name'] = 'test image'
+            post['fmt'] = 'TestImage'
+            # create form
+            form = MultipleFormatImageForm(Image.formats(), post, files)
             # validate resize operation
             v = form.is_valid()
             self.assertTrue(v)
