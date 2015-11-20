@@ -19,7 +19,7 @@ from django.core.files.storage import default_storage
 
 from resizeimage import resizeimage
 
-from helpers import classproperty
+from .helpers import classproperty
 
 
 if sys.version_info > (3, 0):
